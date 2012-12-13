@@ -29,6 +29,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.orm.androrm.migration.Migration;
 import com.orm.androrm.statement.SelectStatement;
@@ -247,6 +248,7 @@ public class DatabaseAdapter {
 		String whereClause = null;
 		if(where != null) {
 			whereClause = where.toString().replace(" WHERE ", "");
+			Log.i("ANDORM", "where: " + whereClause);
 		} 
 		
 		String limitClause = null;

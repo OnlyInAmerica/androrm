@@ -378,14 +378,14 @@ public abstract class Model {
 		return new QuerySet<T>(context, clazz);
 	}
 
-	protected PrimaryKeyField mId;
+	protected PrimaryKeyField _id;
 	
 	public Model() {
-		mId = new PrimaryKeyField();
+		_id = new PrimaryKeyField();
 	}
 	
 	public Model(boolean suppressAutoincrement) {
-		mId = new PrimaryKeyField(!suppressAutoincrement);
+		_id = new PrimaryKeyField(!suppressAutoincrement);
 	}
 	
 	private <T extends Model> void collectData(
@@ -417,7 +417,7 @@ public abstract class Model {
 			int affectedRows = adapter.delete(DatabaseBuilder.getTableName(getClass()), where);
 			
 			if(affectedRows != 0) {
-				mId.set(0);
+				_id.set(0);
 				
 				return resetFields();
 			}
@@ -461,7 +461,7 @@ public abstract class Model {
 	}
 	
 	public int getId() {
-		return mId.get();
+		return _id.get();
 	}
 	
 	private boolean handledByPrimaryKey(Object field) {
@@ -520,7 +520,7 @@ public abstract class Model {
 	}
 	
 	public boolean save(Context context) {
-		if(mId.isAutoincrement() || getId() != 0) {
+		if(_id.isAutoincrement() || getId() != 0) {
 			return save(context, getId(), new ContentValues());
 		}
 		
@@ -528,8 +528,8 @@ public abstract class Model {
 	}
 	
 	public boolean save(Context context, int id) {
-		if(!mId.isAutoincrement()) {
-			mId.set(id);
+		if(!_id.isAutoincrement()) {
+			_id.set(id);
 			
 			ContentValues values = new ContentValues();
 			values.put(PK, id);
@@ -561,12 +561,12 @@ public abstract class Model {
 		int rowID = adapter.doInsertOrUpdate(DatabaseBuilder.getTableName(getClass()), values, where);
 
 		if(rowID == -1) {
-			mId.set(0);
+			_id.set(0);
 			return false;
 		} 
 		
 		if(getId() == 0) {
-			mId.set(rowID);
+			_id.set(rowID);
 		}
 		
 		try {

@@ -130,8 +130,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		for(Class<? extends Model> model: getModels()) {
 			List<TableDefinition> tableDefinitions = DatabaseBuilder.getTableDefinitions(model);
-			Log.i("Creating DB", model.getCanonicalName());
+			Log.i("Creating TABLE ", model.getCanonicalName());
 			for(TableDefinition definition: tableDefinitions) {
+				Log.i("SQL:", definition.toString());
 				db.execSQL(definition.toString());
 				getTables().add(definition.getTableName());
 			}
