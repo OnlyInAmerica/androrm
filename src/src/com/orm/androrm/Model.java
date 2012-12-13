@@ -88,7 +88,7 @@ public abstract class Model {
 	 * Name used for the primary key field, that is
 	 * automatically assigned to each model. 
 	 */
-	public static final String PK = "mId";
+	public static final String PK = "_id";
 	
 	public static final String COUNT = "item_count";
 	
