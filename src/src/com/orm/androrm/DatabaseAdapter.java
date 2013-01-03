@@ -104,7 +104,7 @@ public class DatabaseAdapter {
 	 */
 	public void close() {
 		if(mRunningTransactions == 0) {
-			mDbHelper.close();
+			//mDbHelper.close();
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class DatabaseAdapter {
 	 * @param 	where	{@link Where} clause to find the object.
 	 * @return	Number of affected rows.
 	 */
-	public int delete(String table, Where where) {
+	public synchronized int delete(String table, Where where) {
 		open();	
 		int affectedRows = mDb.delete(table, where.toString().replace(" WHERE ", ""), null);
 		close();
@@ -132,7 +132,7 @@ public class DatabaseAdapter {
 	 * 
 	 * @return 	The number of rows affected on update, the rowId on insert, -1 on error.		
 	 */
-	public int doInsertOrUpdate(String table, ContentValues values, Where where) {
+	public synchronized int doInsertOrUpdate(String table, ContentValues values, Where where) {
 		int result;
 		
 		open();
@@ -162,7 +162,7 @@ public class DatabaseAdapter {
 		return result;
 	}
 	
-	public void reloadSchema() {
+	public synchronized void reloadSchema() {
 		open();
 		
 		mDbHelper.onCreate(mDb);
@@ -180,7 +180,7 @@ public class DatabaseAdapter {
 	 * @param from	Current name of the table.
 	 * @param to	Desired name of the table. 
 	 */
-	public void renameTable(String from, String to) {
+	public synchronized void renameTable(String from, String to) {
 		open();
 		
 		try {
@@ -199,7 +199,7 @@ public class DatabaseAdapter {
 	/**
 	 * Drops all tables of the current database. 
 	 */
-	public void drop() {
+	public synchronized void drop() {
 		open();
 		
 		mDbHelper.drop(mDb);		
@@ -214,7 +214,7 @@ public class DatabaseAdapter {
 	 * 
 	 * @param 	tableName	Name of the table to drop.
 	 */
-	public void drop(String tableName) {
+	public synchronized void drop(String tableName) {
 		open();
 		
 		String sql = "DROP TABLE IF EXISTS `" + tableName + "`;";
@@ -225,7 +225,7 @@ public class DatabaseAdapter {
 		close();
 	}
 	
-	public void resetMigrations() {
+	public synchronized void resetMigrations() {
 		open();
 		
 		String sql = "DROP TABLE IF EXISTS `" + DatabaseBuilder.getTableName(Migration.class) + "`;";
@@ -244,7 +244,7 @@ public class DatabaseAdapter {
 	 * @param 	limit	{@link Limit} clause to apply.
 	 * @return	{@link Cursor} that represents the query result.
 	 */
-	private Cursor get(String table, Where where, Limit limit) {
+	private synchronized Cursor get(String table, Where where, Limit limit) {
 		String whereClause = null;
 		if(where != null) {
 			whereClause = where.toString().replace(" WHERE ", "");
@@ -268,19 +268,19 @@ public class DatabaseAdapter {
 		return result;
 	}
 	
-	public void increaseTransactionCounter() {
+	public synchronized void increaseTransactionCounter() {
 		mRunningTransactions++;
 	}
 	
-	public void decreaseTransactionCounter() {
+	public synchronized void decreaseTransactionCounter() {
 		mRunningTransactions--;
 	}
 	
-	public void resetTransactionCounter() {
+	public synchronized void resetTransactionCounter() {
 		mRunningTransactions = 0;
 	}
 	
-	public int runningTransactions() {
+	public synchronized int runningTransactions() {
 		return mRunningTransactions;
 	}
 	
@@ -292,7 +292,7 @@ public class DatabaseAdapter {
 	 * 
 	 * @return Current {@link DatabaseAdapter} instance.
 	 */
-	public DatabaseAdapter beginTransaction() {
+	public synchronized DatabaseAdapter beginTransaction() {
 		open();
 		
 		mDb.beginTransactionWithListener(TransactionListener.getFor(this));
@@ -305,7 +305,7 @@ public class DatabaseAdapter {
 	 * afterwards, thus committing all the data. 
 	 * @return
 	 */
-	public DatabaseAdapter commitTransaction() {
+	public synchronized DatabaseAdapter commitTransaction() {
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
 		
@@ -314,7 +314,7 @@ public class DatabaseAdapter {
 		return this;
 	}
 
-	public DatabaseAdapter rollbackTransaction() {
+	public synchronized DatabaseAdapter rollbackTransaction() {
 		mDb.endTransaction();
 		
 		close();
@@ -332,7 +332,7 @@ public class DatabaseAdapter {
 	 * @return this to enable chaining.
 	 * @throws SQLException
 	 */
-	public DatabaseAdapter open() throws SQLException {
+	public synchronized DatabaseAdapter open() throws SQLException {
 		if(mRunningTransactions == 0) {
 			mDb = mDbHelper.getWritableDatabase();
 		}
@@ -340,11 +340,11 @@ public class DatabaseAdapter {
 		return this;
 	}
 	
-	public Cursor query(SelectStatement select) {
+	public synchronized Cursor query(SelectStatement select) {
 		return mDb.rawQuery(select.toString(), null);
 	}
 	
-	public Cursor query(String query) {
+	public synchronized Cursor query(String query) {
 		return mDb.rawQuery(query, null);
 	}
 	
@@ -353,7 +353,7 @@ public class DatabaseAdapter {
 	 * 
 	 * @param query
 	 */
-	public void exec(String query) {
+	public synchronized void exec(String query) {
 		mDb.execSQL(query);
 	}
 	
@@ -363,7 +363,7 @@ public class DatabaseAdapter {
 	 * 
 	 * @param models	{@link List} of classes inheriting from {@link Model}.
 	 */
-	public void setModels(List<Class<? extends Model>> models) {
+	public synchronized void setModels(List<Class<? extends Model>> models) {
 		open();
 		
 		mDbHelper.setModels(mDb, models);
