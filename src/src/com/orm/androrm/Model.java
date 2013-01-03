@@ -388,7 +388,7 @@ public abstract class Model {
 		_id = new PrimaryKeyField(!suppressAutoincrement);
 	}
 	
-	private <T extends Model> void collectData(
+	public <T extends Model> void collectData(
 			
 			Context 		context, 
 			ContentValues 	values, 
